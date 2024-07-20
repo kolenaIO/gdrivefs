@@ -44,6 +44,7 @@ class GoogleDriveFileSystem(AbstractFileSystem):
 
     def __init__(self, root_file_id=None, token="browser",
                  access="full_control", spaces='drive', creds=None,
+                 client_id=None, client_secret=None,
                  **kwargs):
         """
         Access to gdrive as a file-system
@@ -79,6 +80,8 @@ class GoogleDriveFileSystem(AbstractFileSystem):
         self.spaces = spaces
         self.root_file_id = root_file_id or 'root'
         self.creds = creds
+        self.client_id = client_id
+        self.client_secret = client_secret
         self.connect(method=token)
 
     def connect(self, method=None):
@@ -105,7 +108,7 @@ class GoogleDriveFileSystem(AbstractFileSystem):
 
     def _connect_cache(self):
         return pydata_google_auth.get_user_credentials(
-            self.scopes, use_local_webserver=True
+            self.scopes, use_local_webserver=True, client_id=self.client_id, client_secret=self.client_secret,
         )
     
     def _connect_service_account(self):
