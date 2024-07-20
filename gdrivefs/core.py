@@ -177,7 +177,8 @@ class GoogleDriveFileSystem(AbstractFileSystem):
         files = self._ls_from_cache(path)
         if not files:
             if path == "":
-                file_id = self.root_file_id
+                # file_id = self.root_file_id
+                file_id = None
             else:
                 file_id = self.path_to_file_id(path, trashed=trashed)
             files = self._list_directory_by_id(file_id, trashed=trashed,
@@ -197,9 +198,11 @@ class GoogleDriveFileSystem(AbstractFileSystem):
         all_files = []
         page_token = None
         afields = 'nextPageToken, files(%s)' % fields
-        query = f"'{file_id}' in parents  "
-        if not trashed:
-            query += "and trashed = false "
+        query = None
+        if file_id:
+            query = f"'{file_id}' in parents  "
+            if not trashed:
+                query += "and trashed = false "
         while True:
             response = self.service.list(q=query,
                                          spaces=self.spaces, fields=afields,
