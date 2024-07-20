@@ -222,7 +222,7 @@ class GoogleDriveFileSystem(AbstractFileSystem):
         if parent is None:
             parent = ""
         top_file_id = self._get_directory_child_by_name(items[0], parent,
-                                                        trashed=trashed)
+                                                        trashed=trashed, is_directory=len(items) > 1)
         if len(items) == 1:
             return top_file_id
         else:
@@ -231,13 +231,16 @@ class GoogleDriveFileSystem(AbstractFileSystem):
                                         trashed=trashed)
 
     def _get_directory_child_by_name(self, child_name, directory_file_id,
-                                     trashed=False):
+                                     trashed=False, is_directory=False):
         all_children = self._list_directory_by_id(directory_file_id,
                                                   trashed=trashed)
         possible_children = []
         for child in all_children:
             if child['name'] == child_name:
-                possible_children.append(child['id'])
+                if is_directory and child['mimeType'] == 'application/vnd.google-apps.folder':
+                    possible_children.append(child['id'])
+                elif not is_directory and child['mimeType'] != 'application/vnd.google-apps.folder':
+                    possible_children.append(child['id'])
         if len(possible_children) == 0:
             raise FileNotFoundError(
                 f'Directory {directory_file_id} has no child '
