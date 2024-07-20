@@ -203,6 +203,8 @@ class GoogleDriveFileSystem(AbstractFileSystem):
         while True:
             response = self.service.list(q=query,
                                          spaces=self.spaces, fields=afields,
+                                         supportsAllDrives=True,
+                                         includeItemsFromAllDrives=True,
                                          pageToken=page_token).execute()
             for f in response.get('files', []):
                 all_files.append(_finfo_from_response(f, path_prefix))
