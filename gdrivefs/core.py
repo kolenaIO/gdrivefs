@@ -177,7 +177,6 @@ class GoogleDriveFileSystem(AbstractFileSystem):
         files = self._ls_from_cache(path)
         if not files:
             if path == "":
-                # file_id = self.root_file_id
                 file_id = None
             else:
                 file_id = self.path_to_file_id(path, trashed=trashed)
@@ -209,7 +208,6 @@ class GoogleDriveFileSystem(AbstractFileSystem):
                                          pageToken=page_token).execute()
             for f in response.get('files', []):
                 all_files.append(_finfo_from_response(f, path_prefix))
-            more = response.get('incompleteSearch', False)
             page_token = response.get('nextPageToken', None)
             if page_token is None:
                 break
@@ -222,7 +220,7 @@ class GoogleDriveFileSystem(AbstractFileSystem):
         if parent is None:
             parent = ""
         top_file_id = self._get_directory_child_by_name(items[0], parent,
-                                                        trashed=trashed, is_directory=len(items) > 1)
+                                                        trashed=trashed, child_is_directory=len(items) > 1)
         if len(items) == 1:
             return top_file_id
         else:
@@ -231,20 +229,24 @@ class GoogleDriveFileSystem(AbstractFileSystem):
                                         trashed=trashed)
 
     def _get_directory_child_by_name(self, child_name, directory_file_id,
-                                     trashed=False, is_directory=False):
+                                     trashed=False, child_is_directory=False):
         all_children = self._list_directory_by_id(directory_file_id,
                                                   trashed=trashed)
         possible_children = []
         for child in all_children:
             if child['name'] == child_name:
-                if is_directory and child['mimeType'] == 'application/vnd.google-apps.folder':
-                    possible_children.append(child['id'])
-                elif not is_directory and child['mimeType'] != 'application/vnd.google-apps.folder':
-                    possible_children.append(child['id'])
+                possible_children.append(child)
         if len(possible_children) == 0:
             raise FileNotFoundError(
                 f'Directory {directory_file_id} has no child '
                 f'named {child_name}')
+        if len(possible_children) > 1:
+            # attempt to filter by mimeType if we have too many children
+            possible_children = [
+                child for child in possible_children
+                if (child['mimeType'] == 'application/vnd.google-apps.folder') == child_is_directory
+            ]
+        possible_children = [child['id'] for child in possible_children]
         if len(possible_children) == 1:
             return possible_children[0]
         else:
