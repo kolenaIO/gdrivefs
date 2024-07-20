@@ -46,7 +46,7 @@ class GoogleDriveFileSystem(AbstractFileSystem):
                  access="full_control", spaces='drive', creds=None,
                  **kwargs):
         """
-        Access to dgrive as a file-system
+        Access to gdrive as a file-system
 
         :param root_file_id: str or None
             If you have a share, drive or folder ID to treat as the FS root, enter
@@ -62,10 +62,10 @@ class GoogleDriveFileSystem(AbstractFileSystem):
             Of these, only the first is general
         :param creds: None or dict
             Required just for "service_account" token, a dict containing the service account
-            credentials obtainend in GCP console. The dict content is the same as the json file
+            credentials obtained in GCP console. The dict content is the same as the json file
             downloaded from GCP console. More details can be found here:
             https://cloud.google.com/iam/docs/service-account-creds#key-types
-            This credential can be usful when integrating with other GCP services, and when you
+            This credential can be useful when integrating with other GCP services, and when you
             don't want the user to be prompted to authenticate.
             The files need to be shared with the service account email address, that can be found
             in the json file.
