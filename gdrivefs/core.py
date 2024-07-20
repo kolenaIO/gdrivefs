@@ -206,8 +206,6 @@ class GoogleDriveFileSystem(AbstractFileSystem):
         while True:
             response = self.service.list(q=query,
                                          spaces=self.spaces, fields=afields,
-                                         supportsAllDrives=True,
-                                         includeItemsFromAllDrives=True,
                                          pageToken=page_token).execute()
             for f in response.get('files', []):
                 all_files.append(_finfo_from_response(f, path_prefix))
@@ -222,7 +220,7 @@ class GoogleDriveFileSystem(AbstractFileSystem):
         if path in ["", "/", "root", self.root_file_id]:
             return self.root_file_id
         if parent is None:
-            parent = self.root_file_id
+            parent = ""
         top_file_id = self._get_directory_child_by_name(items[0], parent,
                                                         trashed=trashed)
         if len(items) == 1:
